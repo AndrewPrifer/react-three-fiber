@@ -5,6 +5,7 @@ import { createPointerEvents } from './events'
 import { UseStore } from 'zustand'
 import { RootState } from '../core/store'
 import { EventManager } from '../core/events'
+import { Reconciler } from 'react-reconciler'
 
 export interface Props
   extends Omit<RenderProps<HTMLCanvasElement>, 'size' | 'events'>,
@@ -13,6 +14,7 @@ export interface Props
   fallback?: React.ReactNode
   resize?: ResizeOptions
   events?: (store: UseStore<RootState>) => EventManager<any>
+  reconciler?: Reconciler<unknown, unknown, unknown, unknown, unknown>
 }
 
 type SetBlock = false | Promise<null> | null
@@ -42,7 +44,18 @@ class ErrorBoundary extends React.Component<{ set: React.Dispatch<any> }, { erro
   }
 }
 
-export function Canvas({ children, fallback, tabIndex, resize, id, style, className, events, ...props }: Props) {
+export function Canvas({
+  children,
+  fallback,
+  tabIndex,
+  resize,
+  id,
+  style,
+  className,
+  events,
+  reconciler,
+  ...props
+}: Props) {
   const [ref, size] = useMeasure({ scroll: true, debounce: { scroll: 50, resize: 0 }, ...resize })
   const canvas = React.useRef<HTMLCanvasElement>(null!)
   const [block, setBlock] = React.useState<SetBlock>(false)
@@ -61,6 +74,7 @@ export function Canvas({ children, fallback, tabIndex, resize, id, style, classN
         </ErrorBoundary>,
         canvas.current,
         { ...props, size, events: events || createPointerEvents },
+        reconciler,
       )
     }
   }, [size, children])

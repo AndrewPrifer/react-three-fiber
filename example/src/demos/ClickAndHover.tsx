@@ -1,6 +1,7 @@
 import * as THREE from 'three'
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { reconciler, diagramRoot } from '../diagram'
 
 const mesh = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ color: 'red' }))
 const group = new THREE.Group()
@@ -32,12 +33,29 @@ function Box2(props: any) {
 }
 
 export default function App() {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    ref.current!.append(diagramRoot)
+  }, [])
+
   return (
-    <Canvas>
-      <group>
-        <Box position={[-0.5, 0, 0]} />
-      </group>
-      <Box2 position={[0.5, 0, 0]} />
-    </Canvas>
+    <>
+      <div
+        ref={ref}
+        style={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          zIndex: 10,
+        }}
+      />
+      <Canvas reconciler={reconciler}>
+        <group>
+          <Box position={[-0.5, 0, 0]} />
+        </group>
+        <Box2 position={[0.5, 0, 0]} />
+      </Canvas>
+    </>
   )
 }

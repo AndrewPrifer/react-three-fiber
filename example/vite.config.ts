@@ -8,6 +8,7 @@ export default defineConfig({
       react: path.resolve('./node_modules/react'),
       'react-dom': path.resolve('./node_modules/react-dom'),
       '@react-three/fiber': path.resolve('../packages/fiber/src/index.tsx'),
+      '@react-three/reconciler': path.resolve('../packages/reconciler/src/index.ts'),
     },
   },
   plugins: [reactRefresh()],

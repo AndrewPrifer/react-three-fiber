@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import * as React from 'react'
-import { RootTag } from 'react-reconciler'
+import { Reconciler, RootTag } from 'react-reconciler'
 import { UseStore } from 'zustand'
 
 import { is } from '../core/is'
@@ -14,7 +14,7 @@ import { EventManager } from '../core/events'
 const roots = new Map<Element, Root>()
 const modes = ['legacy', 'blocking', 'concurrent'] as const
 const { invalidate, advance } = createLoop(roots)
-const { reconciler, applyProps } = createRenderer(roots)
+const { reconciler: defaultReconciler, applyProps } = createRenderer(roots)
 
 export type RenderProps<TCanvas extends Element> = Omit<StoreProps, 'gl' | 'events' | 'size'> & {
   gl?: THREE.WebGLRenderer | THREE.WebGLRendererParameters
@@ -42,7 +42,10 @@ function render<TCanvas extends Element>(
   element: React.ReactNode,
   canvas: TCanvas,
   { gl, size, mode = modes[1], events, onCreated, ...props }: RenderProps<TCanvas> = {},
+  reconciler?: Reconciler<unknown, unknown, unknown, unknown, unknown>,
 ): UseStore<RootState> {
+  const myReconciler = reconciler ?? defaultReconciler
+
   // Allow size to take on container bounds initially
   if (!size) {
     size = {
@@ -92,7 +95,7 @@ function render<TCanvas extends Element>(
     store = createStore(applyProps, invalidate, advance, { gl: glRenderer, size, ...props })
     const state = store.getState()
     // Create renderer
-    fiber = reconciler.createContainer(store, modes.indexOf(mode) as RootTag, false, null)
+    fiber = myReconciler.createContainer(store, modes.indexOf(mode) as RootTag, false, null)
     // Map it
     roots.set(canvas, { fiber, store })
     // Store events internally
@@ -100,7 +103,7 @@ function render<TCanvas extends Element>(
   }
 
   if (store && fiber) {
-    reconciler.updateContainer(
+    myReconciler.updateContainer(
       <Provider store={store} element={element} onCreated={onCreated} target={canvas} />,
       fiber,
       null,
@@ -135,13 +138,19 @@ function Provider<TElement extends Element>({
   return <context.Provider value={store}>{element}</context.Provider>
 }
 
-function unmountComponentAtNode<TElement extends Element>(canvas: TElement, callback?: (canvas: TElement) => void) {
+function unmountComponentAtNode<TElement extends Element>(
+  canvas: TElement,
+  callback?: (canvas: TElement) => void,
+  reconciler?: Reconciler<unknown, unknown, unknown, unknown, unknown>,
+) {
+  const myReconciler = reconciler ?? defaultReconciler
+
   const root = roots.get(canvas)
   const fiber = root?.fiber
   if (fiber) {
     const state = root?.store.getState()
     if (state) state.internal.active = false
-    reconciler.updateContainer(null, fiber, null, () => {
+    myReconciler.updateContainer(null, fiber, null, () => {
       if (state) {
         setTimeout(() => {
           state.events.disconnect?.()
@@ -164,7 +173,7 @@ function dispose<TObj extends { dispose?: () => void; type?: string; [key: strin
   }
 }
 
-const act = reconciler.act
+const act = defaultReconciler.act
 const hasSymbol = is.fun(Symbol) && Symbol.for
 const REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca
 function createPortal(
@@ -182,7 +191,7 @@ function createPortal(
   }
 }
 
-reconciler.injectIntoDevTools({
+defaultReconciler.injectIntoDevTools({
   bundleType: process.env.NODE_ENV === 'production' ? 0 : 1,
   rendererPackageName: '@react-three/fiber',
   version: '17.0.2',
@@ -195,7 +204,6 @@ export {
   unmountComponentAtNode,
   createPortal,
   events,
-  reconciler,
   applyProps,
   dispose,
   invalidate,
@@ -205,6 +213,5 @@ export {
   addAfterEffect,
   addTail,
   Canvas,
-  act,
   roots as _roots,
 }

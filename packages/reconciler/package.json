@@ -1,0 +1,33 @@
+{
+  "name": "@react-three/reconciler",
+  "version": "0.1.0",
+  "description": "Reconciler for react-three-fiber",
+  "author": "Paul Henschel (https://github.com/drcmda)",
+  "license": "MIT",
+  "private": false,
+  "main": "dist/react-three-reconciler.cjs.js",
+  "module": "dist/react-three-reconciler.esm.js",
+  "types": "dist/react-three-reconciler.cjs.d.ts",
+  "bugs": {
+    "url": "https://github.com/pmndrs/react-three-fiber/issues"
+  },
+  "homepage": "https://github.com/pmndrs/react-three-fiber#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pmndrs/react-three-fiber.git"
+  },
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
+  "dependencies": {
+    "react-reconciler": "^0.26.2",
+    "scheduler": "^0.20.2"
+  },
+  "peerDependencies": {
+    "react": ">=17.0",
+    "@react-three/fiber": ">=7.0.0",
+    "three": ">=0.126"
+  }
+}
