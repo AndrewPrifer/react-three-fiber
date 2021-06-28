@@ -14,7 +14,7 @@ import { EventManager } from '../core/events'
 const roots = new Map<Element, Root>()
 const modes = ['legacy', 'blocking', 'concurrent'] as const
 const { invalidate, advance } = createLoop(roots)
-const { reconciler: defaultReconciler, applyProps } = createRenderer(roots)
+const { reconciler: defaultReconciler, applyProps } = createRenderer()
 
 export type RenderProps<TCanvas extends Element> = Omit<StoreProps, 'gl' | 'events' | 'size'> & {
   gl?: THREE.WebGLRenderer | THREE.WebGLRendererParameters

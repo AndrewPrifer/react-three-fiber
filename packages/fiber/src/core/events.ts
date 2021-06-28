@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import type { UseStore } from 'zustand'
-import type { Instance } from './renderer'
+import type { Instance } from '@react-three/reconciler'
 import type { RootState } from './store'
 
 export interface Intersection extends THREE.Intersection {
